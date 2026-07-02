@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeedRound Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cloud:#F5F9FF;
+    --sky:#E4F1FF;
+    --bubblegum:#FF5D8F;
+    --bubblegum-dark:#E14776;
+    --sunshine:#FFC94D;
+    --mint:#37C99A;
+    --indigo:#232946;
+    --white:#FFFFFF;
+    --grey:#8A93A8;
+    --radius-lg:28px;
+    --radius-md:18px;
+    --radius-sm:12px;
+    --shadow-soft:0 10px 30px rgba(35,41,70,0.08);
+    --shadow-pop:0 18px 40px rgba(255,93,143,0.28);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Manrope',sans-serif;
+    background:var(--cloud);
+    color:var(--indigo);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Baloo 2',cursive;margin:0;}
+  button{font-family:'Manrope',sans-serif;cursor:pointer;border:none;}
+  input{font-family:'Manrope',sans-serif;}
+  .hidden{display:none !important;}
+  a{color:inherit;}
+
+  /* decorative background blobs */
+  .blobs{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none;}
+  .blobs::before, .blobs::after, .blobs span{
+    content:'';position:absolute;border-radius:50%;filter:blur(60px);opacity:0.35;
+  }
+  .blobs::before{width:420px;height:420px;background:var(--sunshine);top:-140px;left:-120px;}
+  .blobs::after{width:380px;height:380px;background:var(--bubblegum);bottom:-160px;right:-100px;}
+  .blobs span{width:300px;height:300px;background:var(--mint);top:40%;left:60%;opacity:0.22;}
+
+  .view{position:relative;z-index:1;min-height:100vh;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border-radius:999px;padding:12px 22px;font-weight:700;font-size:15px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:active{transform:scale(0.96);}
+  .btn-primary{background:var(--bubblegum);color:var(--white);box-shadow:var(--shadow-pop);}
+  .btn-primary:hover{background:var(--bubblegum-dark);}
+  .btn-large{padding:18px 34px;font-size:18px;}
+  .btn-ghost{background:var(--white);color:var(--indigo);box-shadow:var(--shadow-soft);}
+  .btn-ghost:hover{background:var(--sky);}
+  .btn-text{background:transparent;color:var(--grey);font-weight:700;padding:10px 14px;}
+  .btn-text:hover{color:var(--indigo);}
+  .btn-text.danger{color:#E14776;}
+  .btn-small{background:var(--indigo);color:var(--white);padding:10px 16px;border-radius:12px;font-size:14px;}
+  button:disabled{opacity:0.4;cursor:not-allowed;}
+
+  /* ---------- Topbars ---------- */
+  .display-topbar, .admin-topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 32px;
+  }
+  .brand{font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;display:flex;align-items:center;gap:8px;}
+  .brand-mark{font-size:24px;}
+  .admin-tag{background:var(--indigo);color:var(--white);font-size:12px;padding:4px 10px;border-radius:999px;margin-left:8px;font-family:'Manrope',sans-serif;}
+
+  /* ---------- Setup notice ---------- */
+  .setup-notice{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    background:var(--sunshine);color:var(--indigo);text-align:center;
+    padding:14px 20px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,0.1);
+  }
+
+  /* ---------- Display: section titles ---------- */
+  #display-main{padding:0 32px 60px;max-width:1200px;margin:0 auto;}
+  .section-title{font-size:34px;font-weight:800;margin-bottom:6px;}
+  .empty-msg{color:var(--grey);font-size:16px;margin-top:20px;}
+  .round-heading, .round-heading-admin{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+  .round-badge{
+    background:var(--indigo);color:var(--white);font-family:'Space Mono',monospace;
+    padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700;
+  }
+  .hint{color:var(--grey);font-weight:600;font-size:14px;}
+
+  /* ---------- Participant grid & cards ---------- */
+  .participants-grid{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:20px;
+  }
+  .participant-card{
+    background:var(--white);border-radius:var(--radius-lg);padding:22px;
+    box-shadow:var(--shadow-soft);position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;
+    border:3px solid transparent;transition:border-color .3s ease, transform .3s ease;
+  }
+  .participant-card.stopped{border-color:var(--mint);}
+  .participant-card.first{border-color:var(--sunshine);background:linear-gradient(180deg,#FFFDF6,#FFFFFF);}
+  .keycap{
+    position:absolute;top:-16px;left:-16px;
+    width:40px;height:40px;border-radius:12px;background:var(--indigo);color:var(--white);
+    font-family:'Space Mono',monospace;font-weight:700;font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 0 rgba(0,0,0,0.2);
+  }
+  .participant-info{text-align:center;}
+  .participant-name{font-weight:800;font-size:18px;}
+  .participant-class{color:var(--grey);font-size:13px;font-weight:600;}
+  .timer-ring-wrap{position:relative;width:130px;height:130px;}
+  .timer-ring{width:100%;height:100%;transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:var(--sky);stroke-width:8;}
+  .ring-fg{
+    fill:none;stroke:var(--grey);stroke-width:8;stroke-linecap:round;
+    stroke-dasharray:70 194;stroke-dashoffset:0;transform-origin:50px 50px;
+  }
+  .ring-fg.spin{stroke:var(--bubblegum);animation:ring-spin 1.4s linear infinite;}
+  .ring-fg.ring-complete{stroke:var(--mint);stroke-dasharray:264;stroke-dashoffset:0;animation:none;}
+  @keyframes ring-spin{ to{ transform:rotate(360deg); } }
+  .timer-digits{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:18px;
+  }
+  .status-pill{
+    background:var(--sky);color:var(--indigo);font-size:13px;font-weight:700;
+    padding:6px 14px;border-radius:999px;
+  }
+  .participant-card.stopped .status-pill{background:var(--mint);color:var(--white);}
+
+  /* ---------- Leaderboard ---------- */
+  .leaderboard-list{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
+  .leaderboard-row{
+    display:grid;grid-template-columns:44px 1fr auto auto auto;align-items:center;gap:16px;
+    background:var(--white);border-radius:var(--radius-md);padding:14px 20px;box-shadow:var(--shadow-soft);
+    will-change:transform;
+  }
+  .leaderboard-row.rank-first{background:linear-gradient(90deg,#FFF7E0,#FFFFFF);box-shadow:0 12px 30px rgba(255,201,77,0.35);}
+  .leaderboard-row.lb-enter{animation:lb-pop .5s ease;}
+  @keyframes lb-pop{ from{opacity:0;transform:translateY(14px) scale(0.98);} to{opacity:1;transform:none;} }
+  .lb-rank{font-family:'Space Mono',monospace;font-weight:700;font-size:18px;color:var(--grey);}
+  .rank-first .lb-rank{color:var(--sunshine);}
+  .lb-name{font-weight:800;font-size:17px;}
+  .lb-class{color:var(--grey);font-size:13px;font-weight:600;}
+  .lb-time{font-family:'Space Mono',monospace;font-weight:700;color:var(--bubblegum);}
+  .lb-rounds{color:var(--grey);font-size:12px;font-weight:600;}
+
+  /* ---------- Winner overlay ---------- */
+  .winner-overlay{
+    position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 40%, #FFFFFF 0%, var(--sky) 100%);
+  }
+  .confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .confetti::before, .confetti::after{
+    content:'';position:absolute;width:100%;height:100%;
+    background-image:
+      radial-gradient(circle, var(--bubblegum) 8px, transparent 9px),
+      radial-gradient(circle, var(--sunshine) 6px, transparent 7px),
+      radial-gradient(circle, var(--mint) 7px, transparent 8px);
+    background-repeat:repeat;
+    background-size:180px 180px, 220px 220px, 260px 260px;
+    background-position:0 0, 60px 100px, 140px 30px;
+    opacity:0;animation:confetti-pop .8s ease forwards;
+  }
+  .confetti::after{background-size:200px 200px, 240px 240px, 160px 160px;background-position:40px 60px, 120px 10px, 20px 140px;animation-delay:.1s;}
+  @keyframes confetti-pop{ from{opacity:0;transform:scale(0.9);} to{opacity:0.5;transform:scale(1);} }
+  .winner-card{text-align:center;position:relative;z-index:1;animation:winner-in .5s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes winner-in{ from{opacity:0;transform:scale(0.7);} to{opacity:1;transform:scale(1);} }
+  .winner-eyebrow{
+    font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--bubblegum);font-size:16px;margin-bottom:10px;
+  }
+  .winner-name{font-family:'Baloo 2',cursive;font-weight:800;font-size:64px;color:var(--indigo);}
+  .winner-class{color:var(--grey);font-weight:700;font-size:20px;margin-top:6px;}
+  .winner-time{
+    margin-top:18px;display:inline-block;background:var(--indigo);color:var(--white);
+    font-family:'Space Mono',monospace;font-size:26px;padding:10px 26px;border-radius:999px;
+  }
+
+  /* ---------- Admin layout ---------- */
+  .admin-layout{display:grid;grid-template-columns:280px 1fr;gap:28px;padding:0 32px 60px;max-width:1300px;margin:0 auto;}
+  .admin-stats-panel{
+    background:var(--white);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-soft);
+    display:flex;flex-direction:column;gap:16px;align-self:start;
+  }
+  .admin-stats-panel h2{font-size:20px;}
+  .stat-card{background:var(--sky);border-radius:var(--radius-md);padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
+  .stat-label{font-size:12px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;}
+  .stat-value{font-family:'Space Mono',monospace;font-weight:700;font-size:22px;}
+  .settings-block{border-top:1px solid var(--sky);padding-top:16px;}
+  .settings-block label{font-size:13px;font-weight:700;color:var(--grey);display:block;margin-bottom:8px;}
+  .cost-row{display:flex;gap:8px;}
+  .cost-row input{
+    flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:2px solid var(--sky);font-weight:700;
+  }
+  .cost-row input:focus{outline:2px solid var(--bubblegum);border-color:var(--bubblegum);}
+  details.setup-help{font-size:13px;color:var(--grey);}
+  details.setup-help summary{cursor:pointer;font-weight:700;}
+  details.setup-help code{background:var(--sky);padding:2px 6px;border-radius:6px;}
+
+  .admin-main{display:flex;flex-direction:column;gap:26px;}
+  .admin-controls-block{
+    background:var(--white);border-radius:var(--radius-lg);padding:26px;box-shadow:var(--shadow-soft);
+    display:flex;flex-direction:column;align-items:flex-start;gap:14px;
+  }
+  .admin-btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(35,41,70,0.45);z-index:60;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal{
+    background:var(--white);border-radius:var(--radius-lg);padding:28px;max-width:520px;width:100%;
+    max-height:86vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,0.25);
+  }
+  .modal h2{font-size:22px;margin-bottom:18px;}
+  .modal-rows{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .modal-row{display:grid;grid-template-columns:26px 1.4fr 1fr 32px;gap:8px;align-items:center;}
+  .modal-row-num{font-family:'Space Mono',monospace;font-weight:700;color:var(--grey);text-align:center;}
+  .modal-input{
+    padding:10px 12px;border-radius:10px;border:2px solid var(--sky);font-weight:600;width:100%;
+  }
+  .modal-input:focus{outline:none;border-color:var(--bubblegum);}
+  .row-remove-btn{
+    background:var(--sky);color:var(--indigo);border-radius:8px;width:32px;height:36px;font-weight:700;
+  }
+  .row-remove-btn:hover:not(:disabled){background:#ffd7e0;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+
+  /* ---------- Focus visibility ---------- */
+  a:focus-visible, button:focus-visible, input:focus-visible{
+    outline:3px solid var(--bubblegum);outline-offset:2px;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:900px){
+    .admin-layout{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .display-topbar, .admin-topbar{padding:16px 18px;}
+    #display-main, .admin-layout{padding-left:18px;padding-right:18px;}
+    .section-title{font-size:26px;}
+    .winner-name{font-size:40px;}
+    .winner-time{font-size:20px;}
+    .modal-row{grid-template-columns:20px 1fr 1fr 28px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ring-fg.spin{animation:none;}
+    .winner-card, .confetti::before, .confetti::after, .leaderboard-row.lb-enter{animation:none !important;}
+    .leaderboard-row{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="setup-notice" class="setup-notice hidden">
+  ⚠️ Firebase isn't connected yet. Open this HTML file, find the <strong>FIREBASE CONFIG</strong> section near the top of the script, and paste in your Firebase project config.
+</div>
+
+<div id="app">
+
+  <!-- ============ PARTICIPANT DISPLAY VIEW ============ -->
+  <div id="view-display" class="view">
+    <div class="blobs" aria-hidden="true"><span></span></div>
+    <header class="display-topbar">
+      <div class="brand"><span class="brand-mark">⏱️</span> SpeedRound</div>
+      <button class="btn btn-ghost" onclick="location.hash='admin'">Admin</button>
+    </header>
+
+    <main id="display-main">
+      <!-- Leaderboard phase -->
+      <section id="phase-leaderboard-display" class="phase-section">
+        <h1 class="section-title">🏆 Leaderboard</h1>
+        <p id="leaderboard-empty" class="empty-msg">No rounds played yet. Champions will appear here.</p>
+        <div id="leaderboard-list-display" class="leaderboard-list"></div>
+      </section>
+
+      <!-- Ready / Running phase -->
+      <section id="phase-round-display" class="phase-section hidden">
+        <div class="round-heading">
+          <span class="round-badge" id="round-number-display">Round 1</span>
+          <h1 class="section-title" id="round-status-text" style="font-size:24px;">Get Ready!</h1>
+        </div>
+        <div id="participants-grid-display" class="participants-grid"></div>
+      </section>
+
+      <!-- Winner fullscreen phase -->
+      <section id="phase-winner-display" class="phase-section winner-overlay hidden">
+        <div class="confetti" aria-hidden="true"></div>
+        <div class="winner-card">
+          <div class="winner-eyebrow">Champion</div>
+          <div class="winner-name" id="winner-name-display">—</div>
+          <div class="winner-class" id="winner-class-display"></div>
+          <div class="winner-time" id="winner-time-display">00:00.0</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ ADMIN VIEW ============ -->
+  <div id="view-admin" class="view hidden">
+    <header class="admin-topbar">
+      <div class="brand">⏱️ SpeedRound <span class="admin-tag">Admin</span></div>
+      <button class="btn btn-ghost" onclick="location.hash=''">View Display</button>
+    </header>
+
+    <div class="admin-layout">
+      <aside class="admin-stats-panel">
+        <h2>Event Stats</h2>
+        <div class="stat-card">
+          <span class="stat-label">Rounds Played</span>
+          <span class="stat-value" id="stat-rounds">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Participants</span>
+          <span class="stat-value" id="stat-participants">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Revenue</span>
+          <span class="stat-value" id="stat-revenue">Rs. 0</span>
+        </div>
+        <div class="settings-block">
+          <label for="cost-input">Cost per round (Rs.)</label>
+          <div class="cost-row">
+            <input type="number" id="cost-input" min="0" step="1" placeholder="0">
+            <button class="btn btn-small" id="save-cost-btn">Save</button>
+          </div>
+        </div>
+        <details class="setup-help">
+          <summary>Firestore setup help</summary>
+          <p>This app uses three things in your Firestore database: docs <code>meta/live</code>, <code>meta/settings</code>, <code>meta/stats</code>, and a <code>players</code> collection. They're created automatically the first time this page loads. Just make sure your Firestore security rules allow read/write (test mode is fine for a live event).</p>
+        </details>
+        <button class="btn btn-text danger" id="reset-data-btn">Reset all data</button>
+      </aside>
+
+      <main class="admin-main">
+        <div id="admin-idle-controls" class="admin-controls-block">
+          <p class="hint">Ready when you are.</p>
+          <button class="btn btn-primary btn-large" id="new-round-btn">+ New Round</button>
+        </div>
+
+        <div id="admin-ready-controls" class="admin-controls-block hidden">
+          <div class="round-heading-admin">
+            <span class="round-badge" id="round-number-admin"></span>
+            <span class="hint">Participants are on the display. Start when ready.</span>
+          </div>
+          <div class="admin-btn-row">
+            <button class="btn btn-primary btn-large" id="start-timers-btn">▶ Start Timers</button>
+            <button class="btn btn-text" id="cancel-round-btn">Cancel round</button>
+          </div>
+        </div>
+
+        <div id="admin-running-controls" class="admin-controls-block hidden">
+          <div class="round-heading-admin">
+            <span class="round-badge" id="round-number-admin-running"></span>
+            <span class="hint">Press the number key matching a player's keycap to stop their timer.</span>
+          </div>
+        </div>
+
+        <div id="admin-winner-controls" class="admin-controls-block hidden">
+          <p class="hint">Showing the winner on the display… returning to the leaderboard shortly.</p>
+        </div>
+
+        <div id="participants-grid-admin" class="participants-grid"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- New Round Modal -->
+  <div id="new-round-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <h2>New Round — Enter Participants</h2>
+      <div id="modal-rows" class="modal-rows"></div>
+      <button class="btn btn-text" id="add-row-btn">+ Add participant</button>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+        <button class="btn btn-primary" id="modal-ok-btn">OK — Show on Display</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+/* =====================================================================
+   FIREBASE CONFIG — paste your project's config object below.
+   This is the ONE place you need to edit to connect everything to
+   your Firebase project. Get this from:
+   Firebase console → Project settings → General → Your apps → SDK setup.
+
+   Also make sure Firestore is created for the project, and that your
+   security rules allow read/write (test mode is fine for a live event):
+
+     rules_version = '2';
+     service cloud.firestore {
+       match /databases/{database}/documents {
+         match /{document=**} {
+           allow read, write: if true;
+         }
+       }
+     }
+===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCuuH__lXH7CdukAPYzL-CA7TVO-3Q0WFY",
+  authDomain: "projecthub-258cd.firebaseapp.com",
+  projectId: "projecthub-258cd",
+  storageBucket: "projecthub-258cd.firebasestorage.app",
+  messagingSenderId: "226921203496",
+  appId: "1:226921203496:web:b53fea78fe9dfd0e7d721d"
+};
+/* ===================================================================== */
+
+let db, liveRef, settingsRef, statsRef, playersRef;
+let currentLive = null;
+let currentSettings = { costPerRound: 0 };
+let currentStats = { totalRounds: 0, totalRevenue: 0 };
+let currentPlayers = [];
+let modalRows = [];
+
+/* ---------------- Helpers ---------------- */
+function pad(n, len = 2) { return String(n).padStart(len, '0'); }
+function formatTime(ms) {
+  if (ms === null || ms === undefined) return '00:00.0';
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const d = Math.floor((ms % 1000) / 100);
+  return pad(m) + ':' + pad(s) + '.' + d;
+}
+function normalizeName(name) { return String(name).trim().toLowerCase().replace(/\s+/g, ' '); }
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* ---------------- Routing ---------------- */
+function applyRoute() {
+  const isAdmin = location.hash === '#admin';
+  document.getElementById('view-display').classList.toggle('hidden', isAdmin);
+  document.getElementById('view-admin').classList.toggle('hidden', !isAdmin);
+}
+window.addEventListener('hashchange', applyRoute);
+
+/* ---------------- Rendering: participant grid ---------------- */
+function ringClass(p) {
+  if (p.status === 'stopped') return 'ring-fg ring-complete';
+  if (currentLive.phase === 'running') return 'ring-fg spin';
+  return 'ring-fg';
+}
+function renderParticipantsGrid(container, participants, prefix) {
+  if (!container) return;
+  container.innerHTML = '';
+  participants.forEach((p, idx) => {
+    const card = document.createElement('div');
+    const isFirst = p.status === 'stopped' && p.place === 1;
+    card.className = 'participant-card' + (p.status === 'stopped' ? ' stopped' : '') + (isFirst ? ' first' : '');
+    const statusText = p.status === 'stopped'
+      ? ('🏁 #' + p.place)
+      : (currentLive.phase === 'running' ? 'Running' : 'Waiting');
+    card.innerHTML = `
+      <div class="keycap">${idx + 1}</div>
+      <div class="participant-info">
+        <div class="participant-name">${escapeHtml(p.name)}</div>
+        <div class="participant-class">${escapeHtml(p.class || '')}</div>
+      </div>
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+          <circle class="${ringClass(p)}" cx="50" cy="50" r="42"></circle>
+        </svg>
+        <div class="timer-digits" id="${prefix}-timer-${idx}">${formatTime(p.stopTimeMs)}</div>
+      </div>
+      <div class="status-pill">${statusText}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+/* ---------------- Rendering: display view ---------------- */
+function renderDisplay() {
+  if (!currentLive) return;
+  const phase = currentLive.phase;
+  document.getElementById('phase-leaderboard-display').classList.toggle('hidden', phase !== 'leaderboard');
+  document.getElementById('phase-round-display').classList.toggle('hidden', !(phase === 'ready' || phase === 'running'));
+  document.getElementById('phase-winner-display').classList.toggle('hidden', phase !== 'winner');
+
+  if (phase === 'ready' || phase === 'running') {
+    document.getElementById('round-number-display').textContent = 'Round ' + currentLive.roundNumber;
+    document.getElementById('round-status-text').textContent = phase === 'ready' ? 'Get Ready!' : 'Go!';
+    renderParticipantsGrid(document.getElementById('participants-grid-display'), currentLive.participants, 'display');
+  }
+  if (phase === 'winner' && currentLive.winner) {
+    document.getElementById('winner-name-display').textContent = currentLive.winner.name;
+    document.getElementById('winner-class-display').textContent = currentLive.winner.class || '';
+    document.getElementById('winner-time-display').textContent = formatTime(currentLive.winner.timeMs);
+  }
+}
+
+/* ---------------- Rendering: admin view ---------------- */
+function renderAdmin() {
+  if (!currentLive) return;
+  const phase = currentLive.phase;
+  document.getElementById('admin-idle-controls').classList.toggle('hidden', phase !== 'leaderboard');
+  document.getElementById('admin-ready-controls').classList.toggle('hidden', phase !== 'ready');
+  document.getElementById('admin-running-controls').classList.toggle('hidden', phase !== 'running');
+  document.getElementById('admin-winner-controls').classList.toggle('hidden', phase !== 'winner');
+  document.getElementById('participants-grid-admin').classList.toggle('hidden', phase === 'leaderboard');
+
+  if (phase === 'ready') {
+    document.getElementById('round-number-admin').textContent = 'Round ' + currentLive.roundNumber;
+    renderParticipantsGrid(document.getElementById('participants-grid-admin'), currentLive.participants, 'admin');
+  } else if (phase === 'running') {
+    document.getElementById('round-number-admin-running').textContent = 'Round ' + currentLive.roundNumber;
+    renderParticipantsGrid(document.getElementById('participants-grid-admin'), currentLive.participants, 'admin');
+  } else if (phase === 'winner') {
+    renderParticipantsGrid(document.getElementById('participants-grid-admin'), currentLive.participants, 'admin');
+  }
+}
+
+/* ---------------- Timer tick loop (client-side, no writes) ---------------- */
+function tick() {
+  if (currentLive && currentLive.phase === 'running' && currentLive.startTimestamp) {
+    const elapsed = Date.now() - currentLive.startTimestamp;
+    currentLive.participants.forEach((p, idx) => {
+      if (p.status === 'running') {
+        const txt = formatTime(elapsed);
+        const dEl = document.getElementById('display-timer-' + idx);
+        const aEl = document.getElementById('admin-timer-' + idx);
+        if (dEl) dEl.textContent = txt;
+        if (aEl) aEl.textContent = txt;
+      }
+    });
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---------------- Leaderboard rendering with FLIP animation ---------------- */
+function renderLeaderboardList() {
+  const container = document.getElementById('leaderboard-list-display');
+  const emptyMsg = document.getElementById('leaderboard-empty');
+  if (!container) return;
+  emptyMsg.classList.toggle('hidden', currentPlayers.length > 0);
+
+  const firstRects = {};
+  Array.from(container.children).forEach(el => { firstRects[el.dataset.id] = el.getBoundingClientRect(); });
+
+  container.innerHTML = '';
+  currentPlayers.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'leaderboard-row' + (i === 0 ? ' rank-first' : '');
+    row.dataset.id = p.id;
+    const rounds = p.roundsPlayed || 1;
+    row.innerHTML = `
+      <div class="lb-rank">${i + 1}</div>
+      <div class="lb-name">${escapeHtml(p.name)}</div>
+      <div class="lb-class">${escapeHtml(p.class || '')}</div>
+      <div class="lb-time">${formatTime(p.bestTimeMs)}</div>
+      <div class="lb-rounds">${rounds} round${rounds > 1 ? 's' : ''}</div>
+    `;
+    container.appendChild(row);
+  });
+
+  Array.from(container.children).forEach(el => {
+    const first = firstRects[el.dataset.id];
+    if (first) {
+      const last = el.getBoundingClientRect();
+      const dy = first.top - last.top;
+      if (Math.abs(dy) > 1) {
+        el.style.transform = `translateY(${dy}px)`;
+        requestAnimationFrame(() => {
+          el.style.transition = 'transform .6s cubic-bezier(.4,0,.2,1)';
+          el.style.transform = '';
+          setTimeout(() => { el.style.transition = ''; }, 650);
+        });
+      }
+    } else {
+      el.classList.add('lb-enter');
+      setTimeout(() => el.classList.remove('lb-enter'), 600);
+    }
+  });
+}
+
+/* ---------------- New Round modal ---------------- */
+function openNewRoundModal() {
+  modalRows = [{ name: '', class: '' }, { name: '', class: '' }];
+  renderModalRows();
+  document.getElementById('new-round-modal').classList.remove('hidden');
+}
+function renderModalRows() {
+  const wrap = document.getElementById('modal-rows');
+  wrap.innerHTML = '';
+  modalRows.forEach((row, i) => {
+    const div = document.createElement('div');
+    div.className = 'modal-row';
+    div.innerHTML = `
+      <span class="modal-row-num">${i + 1}</span>
+      <input type="text" placeholder="Participant name" value="${escapeHtml(row.name)}" data-idx="${i}" data-field="name" class="modal-input name-input">
+      <input type="text" placeholder="Class" value="${escapeHtml(row.class)}" data-idx="${i}" data-field="class" class="modal-input class-input">
+      <button class="row-remove-btn" data-idx="${i}" ${modalRows.length <= 1 ? 'disabled' : ''}>✕</button>
+    `;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('.modal-input').forEach(inp => {
+    inp.oninput = (e) => {
+      const idx = +e.target.dataset.idx, field = e.target.dataset.field;
+      modalRows[idx][field] = e.target.value;
+    };
+  });
+  wrap.querySelectorAll('.row-remove-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      const idx = +e.currentTarget.dataset.idx;
+      modalRows.splice(idx, 1);
+      renderModalRows();
+    };
+  });
+  document.getElementById('add-row-btn').disabled = modalRows.length >= 9;
+}
+function confirmNewRound() {
+  const cleaned = modalRows
+    .map(r => ({ name: r.name.trim(), class: r.class.trim() }))
+    .filter(r => r.name.length > 0);
+  if (cleaned.length === 0) { alert('Please enter at least one participant name.'); return; }
+  const participants = cleaned.map(r => ({ name: r.name, class: r.class, status: 'pending', stopTimeMs: null, place: null }));
+  const nextRoundNumber = (currentLive && currentLive.roundNumber ? currentLive.roundNumber : 0) + 1;
+  liveRef.set({ phase: 'ready', roundNumber: nextRoundNumber, participants, startTimestamp: null, winner: null });
+  document.getElementById('new-round-modal').classList.add('hidden');
+}
+
+/* ---------------- Round control actions ---------------- */
+function startTimers() {
+  if (!currentLive || currentLive.phase !== 'ready') return;
+  const participants = currentLive.participants.map(p => ({ ...p, status: 'running' }));
+  liveRef.update({ phase: 'running', startTimestamp: Date.now(), participants });
+}
+function cancelRound() {
+  if (!confirm('Cancel this round?')) return;
+  const revertRound = Math.max(0, (currentLive.roundNumber || 1) - 1);
+  liveRef.set({ phase: 'leaderboard', roundNumber: revertRound, participants: [], startTimestamp: null, winner: null });
+}
+function handleStop(index) {
+  if (!currentLive || currentLive.phase !== 'running') return;
+  if (!currentLive.participants[index]) return;
+  if (currentLive.participants[index].status === 'stopped') return;
+
+  const elapsed = Date.now() - currentLive.startTimestamp;
+  const updated = currentLive.participants.map(p => ({ ...p }));
+  const stoppedCountBefore = updated.filter(p => p.status === 'stopped').length;
+  updated[index].status = 'stopped';
+  updated[index].stopTimeMs = elapsed;
+  updated[index].place = stoppedCountBefore + 1;
+
+  const allStopped = updated.every(p => p.status === 'stopped');
+
+  if (allStopped) {
+    const winner = updated.find(p => p.place === 1);
+    liveRef.update({
+      participants: updated,
+      phase: 'winner',
+      winner: { name: winner.name, class: winner.class, timeMs: winner.stopTimeMs }
+    }).then(() => {
+      finalizeRound(updated);
+      setTimeout(() => { liveRef.update({ phase: 'leaderboard' }); }, 4000);
+    });
+  } else {
+    liveRef.update({ participants: updated });
+  }
+}
+async function finalizeRound(participants) {
+  const cost = currentSettings.costPerRound || 0;
+  await statsRef.set({
+    totalRounds: firebase.firestore.FieldValue.increment(1),
+    totalRevenue: firebase.firestore.FieldValue.increment(cost)
+  }, { merge: true });
+
+  for (const p of participants) {
+    const id = normalizeName(p.name);
+    if (!id) continue;
+    const ref = playersRef.doc(id);
+    const snap = await ref.get();
+    if (snap.exists) {
+      const data = snap.data();
+      const newBest = Math.min(data.bestTimeMs ?? Infinity, p.stopTimeMs);
+      await ref.set({
+        name: p.name,
+        class: p.class || data.class || '',
+        bestTimeMs: newBest,
+        roundsPlayed: firebase.firestore.FieldValue.increment(1)
+      }, { merge: true });
+    } else {
+      await ref.set({ name: p.name, class: p.class || '', bestTimeMs: p.stopTimeMs, roundsPlayed: 1 });
+    }
+  }
+}
+
+/* ---------------- Keyboard listener (admin only) ---------------- */
+document.addEventListener('keydown', (e) => {
+  if (location.hash !== '#admin') return;
+  if (!currentLive || currentLive.phase !== 'running') return;
+  if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+  const num = parseInt(e.key, 10);
+  if (isNaN(num) || num < 1 || num > 9) return;
+  handleStop(num - 1);
+});
+
+/* ---------------- Reset all data ---------------- */
+async function resetAllData() {
+  if (!confirm('This will erase all rounds, players, and stats. Continue?')) return;
+  const snap = await playersRef.get();
+  await Promise.all(snap.docs.map(d => d.ref.delete()));
+  await statsRef.set({ totalRounds: 0, totalRevenue: 0 });
+  await liveRef.set({ phase: 'leaderboard', roundNumber: 0, participants: [], startTimestamp: null, winner: null });
+}
+
+/* ---------------- Wire up static buttons ---------------- */
+function wireUpUI() {
+  document.getElementById('new-round-btn').onclick = openNewRoundModal;
+  document.getElementById('add-row-btn').onclick = () => {
+    if (modalRows.length < 9) { modalRows.push({ name: '', class: '' }); renderModalRows(); }
+  };
+  document.getElementById('modal-cancel-btn').onclick = () => document.getElementById('new-round-modal').classList.add('hidden');
+  document.getElementById('modal-ok-btn').onclick = confirmNewRound;
+  document.getElementById('start-timers-btn').onclick = startTimers;
+  document.getElementById('cancel-round-btn').onclick = cancelRound;
+  document.getElementById('save-cost-btn').onclick = () => {
+    const val = parseFloat(document.getElementById('cost-input').value);
+    settingsRef.set({ costPerRound: isNaN(val) ? 0 : val }, { merge: true });
+  };
+  document.getElementById('reset-data-btn').onclick = resetAllData;
+}
+
+/* ---------------- Firebase init ---------------- */
+async function initApp() {
+  if (!firebaseConfig || !firebaseConfig.apiKey) {
+    document.getElementById('setup-notice').classList.remove('hidden');
+    return;
+  }
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    liveRef = db.collection('meta').doc('live');
+    settingsRef = db.collection('meta').doc('settings');
+    statsRef = db.collection('meta').doc('stats');
+    playersRef = db.collection('players');
+
+    const liveSnap = await liveRef.get();
+    if (!liveSnap.exists) {
+      await liveRef.set({ phase: 'leaderboard', roundNumber: 0, participants: [], startTimestamp: null, winner: null });
+    }
+    const settingsSnap = await settingsRef.get();
+    if (!settingsSnap.exists) { await settingsRef.set({ costPerRound: 0 }); }
+    const statsSnap = await statsRef.get();
+    if (!statsSnap.exists) { await statsRef.set({ totalRounds: 0, totalRevenue: 0 }); }
+
+    liveRef.onSnapshot(doc => {
+      currentLive = doc.data();
+      renderDisplay();
+      renderAdmin();
+    });
+
+    settingsRef.onSnapshot(doc => {
+      currentSettings = doc.data() || { costPerRound: 0 };
+      const input = document.getElementById('cost-input');
+      if (document.activeElement !== input) { input.value = currentSettings.costPerRound || ''; }
+    });
+
+    statsRef.onSnapshot(doc => {
+      currentStats = doc.data() || { totalRounds: 0, totalRevenue: 0 };
+      document.getElementById('stat-rounds').textContent = currentStats.totalRounds || 0;
+      document.getElementById('stat-revenue').textContent = 'Rs. ' + (currentStats.totalRevenue || 0).toLocaleString();
+    });
+
+    playersRef.orderBy('bestTimeMs', 'asc').onSnapshot(snap => {
+      currentPlayers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('stat-participants').textContent = currentPlayers.length;
+      renderLeaderboardList();
+    });
+
+    requestAnimationFrame(tick);
+  } catch (err) {
+    console.error(err);
+    const notice = document.getElementById('setup-notice');
+    notice.textContent = '⚠️ Could not connect to Firebase: ' + err.message;
+    notice.classList.remove('hidden');
+  }
+}
+
+applyRoute();
+wireUpUI();
+initApp();
+</script>
+</body>
+</html>
