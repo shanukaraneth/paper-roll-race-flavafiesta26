@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Paper Roll Race - Leaderboard</title>
+<title>Paper Roll Race</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
@@ -54,6 +54,7 @@
   .btn{
     border-radius:999px;padding:12px 22px;font-weight:700;font-size:15px;
     transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    text-decoration:none;display:inline-block;
   }
   .btn:active{transform:scale(0.96);}
   .btn-primary{background:var(--bubblegum);color:var(--white);box-shadow:var(--shadow-pop);}
@@ -70,11 +71,12 @@
   /* ---------- Topbars ---------- */
   .display-topbar, .admin-topbar{
     display:flex;align-items:center;justify-content:space-between;
-    padding:22px 32px;
+    padding:22px 32px;flex-wrap:wrap;gap:12px;
   }
   .brand{font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;display:flex;align-items:center;gap:8px;}
   .brand-mark{font-size:24px;}
   .admin-tag{background:var(--indigo);color:var(--white);font-size:12px;padding:4px 10px;border-radius:999px;margin-left:8px;font-family:'Manrope',sans-serif;}
+  .page-nav{display:flex;gap:10px;}
 
   /* ---------- Setup notice ---------- */
   .setup-notice{
@@ -87,7 +89,8 @@
   #display-main{padding:0 32px 60px;max-width:1200px;margin:0 auto;}
   .section-title{font-size:34px;font-weight:800;margin-bottom:6px;}
   .empty-msg{color:var(--grey);font-size:16px;margin-top:20px;}
-  .round-heading, .round-heading-admin{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+  .empty-state{color:var(--grey);font-weight:600;text-align:center;padding:40px 20px;}
+  .round-heading, .round-heading-admin{display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
   .round-badge{
     background:var(--indigo);color:var(--white);font-family:'Space Mono',monospace;
     padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700;
@@ -96,15 +99,18 @@
 
   /* ---------- Participant grid & cards ---------- */
   .participants-grid{
-    display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:20px;
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:20px;margin-top:18px;
   }
   .participant-card{
     background:var(--white);border-radius:var(--radius-lg);padding:22px;
     box-shadow:var(--shadow-soft);position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;
-    border:3px solid transparent;transition:border-color .3s ease, transform .3s ease;
+    border:3px solid transparent;transition:border-color .3s ease, transform .15s ease;
   }
   .participant-card.stopped{border-color:var(--mint);}
   .participant-card.first{border-color:var(--sunshine);background:linear-gradient(180deg,#FFFDF6,#FFFFFF);}
+  .participant-card.tappable{cursor:pointer;}
+  .participant-card.tappable:active{transform:scale(0.96);}
+  .participant-card.tappable .status-pill{background:var(--bubblegum);color:var(--white);}
   .keycap{
     position:absolute;top:-16px;left:-16px;
     width:40px;height:40px;border-radius:12px;background:var(--indigo);color:var(--white);
@@ -183,7 +189,7 @@
     font-family:'Space Mono',monospace;font-size:26px;padding:10px 26px;border-radius:999px;
   }
 
-  /* ---------- Admin layout ---------- */
+  /* ---------- Admin / Register layout ---------- */
   .admin-layout{display:grid;grid-template-columns:280px 1fr;gap:28px;padding:0 32px 60px;max-width:1300px;margin:0 auto;}
   .admin-stats-panel{
     background:var(--white);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-soft);
@@ -210,6 +216,33 @@
     display:flex;flex-direction:column;align-items:flex-start;gap:14px;
   }
   .admin-btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+
+  .solo-layout{max-width:900px;margin:0 auto;padding:0 32px 60px;display:flex;flex-direction:column;gap:26px;}
+  .admin-controls-block-wrap{display:flex;flex-direction:column;gap:18px;}
+
+  /* ---------- Queue list ---------- */
+  .queue-list{display:flex;flex-direction:column;gap:16px;margin-top:8px;width:100%;}
+  .queue-row{
+    display:flex;align-items:center;gap:14px;background:var(--white);border-radius:var(--radius-md);
+    padding:14px 18px;box-shadow:var(--shadow-soft);position:relative;flex-wrap:wrap;
+  }
+  .queue-row.clickable{cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;}
+  .queue-row.clickable:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(35,41,70,0.14);}
+  .queue-row.clickable:active{transform:scale(0.98);}
+  .queue-next-tag{
+    position:absolute;top:-10px;left:14px;background:var(--sunshine);color:var(--indigo);
+    font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;letter-spacing:0.5px;
+  }
+  .queue-round-badge{
+    background:var(--indigo);color:var(--white);font-family:'Space Mono',monospace;font-size:13px;
+    font-weight:700;padding:6px 12px;border-radius:999px;flex-shrink:0;
+  }
+  .queue-participants{flex:1;min-width:140px;font-weight:700;font-size:14px;color:var(--indigo);}
+  .queue-cost{font-family:'Space Mono',monospace;font-weight:700;color:var(--bubblegum);flex-shrink:0;}
+  .queue-delete-btn{
+    background:var(--sky);color:var(--indigo);border-radius:8px;width:30px;height:30px;font-weight:700;flex-shrink:0;
+  }
+  .queue-delete-btn:hover{background:#ffd7e0;}
 
   /* ---------- Modal ---------- */
   .modal-backdrop{
@@ -245,7 +278,7 @@
   }
   @media (max-width:600px){
     .display-topbar, .admin-topbar{padding:16px 18px;}
-    #display-main, .admin-layout{padding-left:18px;padding-right:18px;}
+    #display-main, .admin-layout, .solo-layout{padding-left:18px;padding-right:18px;}
     .section-title{font-size:26px;}
     .winner-name{font-size:40px;}
     .winner-time{font-size:20px;}
@@ -271,12 +304,15 @@
   <div id="view-display" class="view">
     <div class="blobs" aria-hidden="true"><span></span></div>
     <header class="display-topbar">
-      <div class="brand"><span class="brand-mark">⏱️</span> Paper Roll Race</div>
-      <button class="btn btn-ghost" onclick="location.hash='admin'">Admin</button>
+      <div class="brand"><span class="brand-mark">🧻</span> Paper Roll Race</div>
+      <nav class="page-nav">
+        <a class="btn btn-ghost" href="#register">Register</a>
+        <a class="btn btn-ghost" href="#admin">Admin</a>
+      </nav>
     </header>
 
     <main id="display-main">
-      <!-- Leaderboard phase -->
+      <!-- Leaderboard (shown whenever no round is active) -->
       <section id="phase-leaderboard-display" class="phase-section">
         <h1 class="section-title">🏆 Leaderboard</h1>
         <p id="leaderboard-empty" class="empty-msg">No rounds played yet. Champions will appear here.</p>
@@ -292,7 +328,7 @@
         <div id="participants-grid-display" class="participants-grid"></div>
       </section>
 
-      <!-- Winner fullscreen phase -->
+      <!-- Winner fullscreen phase (5 seconds) -->
       <section id="phase-winner-display" class="phase-section winner-overlay hidden">
         <div class="confetti" aria-hidden="true"></div>
         <div class="winner-card">
@@ -305,11 +341,73 @@
     </main>
   </div>
 
-  <!-- ============ ADMIN VIEW ============ -->
+  <!-- ============ ADMIN VIEW (round control) ============ -->
   <div id="view-admin" class="view hidden">
     <header class="admin-topbar">
-      <div class="brand">⏱️ Paper Roll Race <span class="admin-tag">Admin</span></div>
-      <button class="btn btn-ghost" onclick="location.hash=''">View Display</button>
+      <div class="brand">🧻 Paper Roll Race <span class="admin-tag">Admin</span></div>
+      <nav class="page-nav">
+        <a class="btn btn-ghost" href="#">Display</a>
+        <a class="btn btn-ghost" href="#register">Register</a>
+      </nav>
+    </header>
+
+    <div class="solo-layout">
+
+      <!-- Shown when a round is currently active -->
+      <div id="admin-active-round" class="admin-controls-block-wrap hidden">
+        <div class="round-heading-admin">
+          <span class="round-badge" id="round-number-admin"></span>
+        </div>
+
+        <div id="admin-ready-controls" class="admin-controls-block hidden">
+          <p class="hint">Participants are on the display. Start when ready.</p>
+          <div class="admin-btn-row">
+            <button class="btn btn-primary btn-large" id="start-timers-btn">▶ Start Timers</button>
+            <button class="btn btn-text" id="send-back-btn">Send back to queue</button>
+          </div>
+        </div>
+
+        <div id="admin-running-controls" class="admin-controls-block hidden">
+          <p class="hint">Tap a player's card, or press their number key (1–9), to stop their timer.</p>
+        </div>
+
+        <div id="admin-winner-controls" class="admin-controls-block hidden">
+          <p class="hint">Round complete! Returning to the queue shortly…</p>
+        </div>
+
+        <div id="participants-grid-admin" class="participants-grid"></div>
+      </div>
+
+      <!-- Shown when no round is active: pick the next one from the queue -->
+      <div id="admin-no-active" class="admin-controls-block-wrap">
+        <h2 class="section-title" style="font-size:24px;">Up Next</h2>
+        <p class="hint">Tap a round to bring it up on the display.</p>
+        <p class="empty-state hidden" id="admin-empty-queue-msg">No rounds queued yet. Add one from the Registration page.</p>
+        <div id="queue-list-admin" class="queue-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Winner fullscreen phase (3 seconds on this screen) -->
+    <div id="phase-winner-admin" class="winner-overlay hidden">
+      <div class="confetti" aria-hidden="true"></div>
+      <div class="winner-card">
+        <div class="winner-eyebrow">Champion</div>
+        <div class="winner-name" id="winner-name-admin">—</div>
+        <div class="winner-class" id="winner-class-admin"></div>
+        <div class="winner-time" id="winner-time-admin">00:00.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ REGISTER VIEW (registration desk) ============ -->
+  <div id="view-register" class="view hidden">
+    <header class="admin-topbar">
+      <div class="brand">🧻 Paper Roll Race <span class="admin-tag">Register</span></div>
+      <nav class="page-nav">
+        <a class="btn btn-ghost" href="#">Display</a>
+        <a class="btn btn-ghost" href="#admin">Admin</a>
+      </nav>
     </header>
 
     <div class="admin-layout">
@@ -333,56 +431,39 @@
             <input type="number" id="cost-input" min="0" step="1" placeholder="0">
             <button class="btn btn-small" id="save-cost-btn">Save</button>
           </div>
+          <p class="hint" style="margin-top:8px;">Applies to rounds you queue from now on.</p>
         </div>
         <details class="setup-help">
           <summary>Firestore setup help</summary>
-          <p>This app uses three things in your Firestore database: docs <code>meta/live</code>, <code>meta/settings</code>, <code>meta/stats</code>, and a <code>players</code> collection. They're created automatically the first time this page loads. Just make sure your Firestore security rules allow read/write (test mode is fine for a live event).</p>
+          <p>This app uses a <code>rounds</code> collection, a <code>players</code> collection, and a <code>meta/settings</code> doc. They're created automatically. Just make sure your Firestore security rules allow read/write (test mode is fine for a live event).</p>
         </details>
         <button class="btn btn-text danger" id="reset-data-btn">Reset all data</button>
       </aside>
 
       <main class="admin-main">
-        <div id="admin-idle-controls" class="admin-controls-block">
-          <p class="hint">Ready when you are.</p>
-          <button class="btn btn-primary btn-large" id="new-round-btn">+ New Round</button>
+        <div class="admin-controls-block">
+          <p class="hint">Registering someone? Queue their round here — it won't affect any round already playing on the display.</p>
+          <button class="btn btn-primary btn-large" id="new-round-btn">+ Queue New Round</button>
         </div>
 
-        <div id="admin-ready-controls" class="admin-controls-block hidden">
-          <div class="round-heading-admin">
-            <span class="round-badge" id="round-number-admin"></span>
-            <span class="hint">Participants are on the display. Start when ready.</span>
-          </div>
-          <div class="admin-btn-row">
-            <button class="btn btn-primary btn-large" id="start-timers-btn">▶ Start Timers</button>
-            <button class="btn btn-text" id="cancel-round-btn">Cancel round</button>
-          </div>
+        <div class="admin-controls-block">
+          <h2 style="font-size:20px;">Up Next</h2>
+          <p class="empty-state hidden" id="register-empty-queue-msg">No rounds queued yet.</p>
+          <div id="queue-list-register" class="queue-list"></div>
         </div>
-
-        <div id="admin-running-controls" class="admin-controls-block hidden">
-          <div class="round-heading-admin">
-            <span class="round-badge" id="round-number-admin-running"></span>
-            <span class="hint">Press the number key matching a player's keycap to stop their timer.</span>
-          </div>
-        </div>
-
-        <div id="admin-winner-controls" class="admin-controls-block hidden">
-          <p class="hint">Showing the winner on the display… returning to the leaderboard shortly.</p>
-        </div>
-
-        <div id="participants-grid-admin" class="participants-grid"></div>
       </main>
     </div>
   </div>
 
-  <!-- New Round Modal -->
+  <!-- New Round Modal (used from the Register page) -->
   <div id="new-round-modal" class="modal-backdrop hidden">
     <div class="modal">
-      <h2>New Round — Enter Participants</h2>
+      <h2>Queue New Round — Enter Participants</h2>
       <div id="modal-rows" class="modal-rows"></div>
       <button class="btn btn-text" id="add-row-btn">+ Add participant</button>
       <div class="modal-actions">
         <button class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
-        <button class="btn btn-primary" id="modal-ok-btn">OK — Show on Display</button>
+        <button class="btn btn-primary" id="modal-ok-btn">OK — Add to Queue</button>
       </div>
     </div>
   </div>
@@ -422,12 +503,16 @@ const firebaseConfig = {
 };
 /* ===================================================================== */
 
-let db, liveRef, settingsRef, statsRef, playersRef;
-let currentLive = null;
+let db, roundsRef, settingsRef, playersRef;
+let allRounds = [];
 let currentSettings = { costPerRound: 0 };
-let currentStats = { totalRounds: 0, totalRevenue: 0 };
 let currentPlayers = [];
 let modalRows = [];
+
+/* Local (non-Firestore) timing state for the shorter admin winner overlay */
+let lastWinnerAtSeenAdmin = null;
+let adminWinnerOverlayVisible = false;
+let finalizeScheduledForRound = {};
 
 /* ---------------- Helpers ---------------- */
 function pad(n, len = 2) { return String(n).padStart(len, '0'); }
@@ -444,31 +529,42 @@ function escapeHtml(str) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 }
+function computeActiveRound() { return allRounds.find(r => r.status === 'active') || null; }
+function computeQueuedRounds() { return allRounds.filter(r => r.status === 'queued'); }
+function computeCompletedRounds() { return allRounds.filter(r => r.status === 'completed'); }
 
 /* ---------------- Routing ---------------- */
 function applyRoute() {
-  const isAdmin = location.hash === '#admin';
-  document.getElementById('view-display').classList.toggle('hidden', isAdmin);
+  const hash = location.hash;
+  const isAdmin = hash === '#admin';
+  const isRegister = hash === '#register';
+  document.getElementById('view-display').classList.toggle('hidden', isAdmin || isRegister);
   document.getElementById('view-admin').classList.toggle('hidden', !isAdmin);
+  document.getElementById('view-register').classList.toggle('hidden', !isRegister);
 }
 window.addEventListener('hashchange', applyRoute);
 
 /* ---------------- Rendering: participant grid ---------------- */
-function ringClass(p) {
+function ringClass(p, isRunningPhase) {
   if (p.status === 'stopped') return 'ring-fg ring-complete';
-  if (currentLive.phase === 'running') return 'ring-fg spin';
+  if (isRunningPhase) return 'ring-fg spin';
   return 'ring-fg';
 }
-function renderParticipantsGrid(container, participants, prefix) {
+function renderParticipantsGrid(container, participants, prefix, phase, opts = {}) {
   if (!container) return;
+  const { tappable = false, onTap = null } = opts;
   container.innerHTML = '';
   participants.forEach((p, idx) => {
     const card = document.createElement('div');
     const isFirst = p.status === 'stopped' && p.place === 1;
-    card.className = 'participant-card' + (p.status === 'stopped' ? ' stopped' : '') + (isFirst ? ' first' : '');
+    const isTappable = tappable && p.status !== 'stopped';
+    card.className = 'participant-card'
+      + (p.status === 'stopped' ? ' stopped' : '')
+      + (isFirst ? ' first' : '')
+      + (isTappable ? ' tappable' : '');
     const statusText = p.status === 'stopped'
       ? ('🏁 #' + p.place)
-      : (currentLive.phase === 'running' ? 'Running' : 'Waiting');
+      : (phase === 'running' ? 'Tap to stop' : 'Waiting');
     card.innerHTML = `
       <div class="keycap">${idx + 1}</div>
       <div class="participant-info">
@@ -478,62 +574,198 @@ function renderParticipantsGrid(container, participants, prefix) {
       <div class="timer-ring-wrap">
         <svg class="timer-ring" viewBox="0 0 100 100">
           <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-          <circle class="${ringClass(p)}" cx="50" cy="50" r="42"></circle>
+          <circle class="${ringClass(p, phase === 'running')}" cx="50" cy="50" r="42"></circle>
         </svg>
         <div class="timer-digits" id="${prefix}-timer-${idx}">${formatTime(p.stopTimeMs)}</div>
       </div>
       <div class="status-pill">${statusText}</div>
     `;
+    if (isTappable && onTap) {
+      card.onclick = () => onTap(idx);
+      card.setAttribute('role', 'button');
+      card.tabIndex = 0;
+    }
     container.appendChild(card);
   });
 }
 
 /* ---------------- Rendering: display view ---------------- */
-function renderDisplay() {
-  if (!currentLive) return;
-  const phase = currentLive.phase;
-  document.getElementById('phase-leaderboard-display').classList.toggle('hidden', phase !== 'leaderboard');
-  document.getElementById('phase-round-display').classList.toggle('hidden', !(phase === 'ready' || phase === 'running'));
-  document.getElementById('phase-winner-display').classList.toggle('hidden', phase !== 'winner');
+function renderDisplay(active) {
+  document.getElementById('phase-leaderboard-display').classList.toggle('hidden', !!active);
+  document.getElementById('phase-round-display').classList.toggle('hidden', !(active && (active.phase === 'ready' || active.phase === 'running')));
+  document.getElementById('phase-winner-display').classList.toggle('hidden', !(active && active.phase === 'winner'));
 
-  if (phase === 'ready' || phase === 'running') {
-    document.getElementById('round-number-display').textContent = 'Round ' + currentLive.roundNumber;
-    document.getElementById('round-status-text').textContent = phase === 'ready' ? 'Get Ready!' : 'Go!';
-    renderParticipantsGrid(document.getElementById('participants-grid-display'), currentLive.participants, 'display');
+  if (active && (active.phase === 'ready' || active.phase === 'running')) {
+    document.getElementById('round-number-display').textContent = 'Round ' + active.roundNumber;
+    document.getElementById('round-status-text').textContent = active.phase === 'ready' ? 'Get Ready!' : 'Go!';
+    renderParticipantsGrid(document.getElementById('participants-grid-display'), active.participants, 'display', active.phase);
   }
-  if (phase === 'winner' && currentLive.winner) {
-    document.getElementById('winner-name-display').textContent = currentLive.winner.name;
-    document.getElementById('winner-class-display').textContent = currentLive.winner.class || '';
-    document.getElementById('winner-time-display').textContent = formatTime(currentLive.winner.timeMs);
+  if (active && active.phase === 'winner' && active.winner) {
+    document.getElementById('winner-name-display').textContent = active.winner.name;
+    document.getElementById('winner-class-display').textContent = active.winner.class || '';
+    document.getElementById('winner-time-display').textContent = formatTime(active.winner.timeMs);
   }
 }
 
 /* ---------------- Rendering: admin view ---------------- */
-function renderAdmin() {
-  if (!currentLive) return;
-  const phase = currentLive.phase;
-  document.getElementById('admin-idle-controls').classList.toggle('hidden', phase !== 'leaderboard');
+function renderAdmin(active, queued) {
+  const noActiveBlock = document.getElementById('admin-no-active');
+  const activeBlock = document.getElementById('admin-active-round');
+
+  if (!active) {
+    noActiveBlock.classList.remove('hidden');
+    activeBlock.classList.add('hidden');
+    document.getElementById('phase-winner-admin').classList.add('hidden');
+    document.getElementById('admin-empty-queue-msg').classList.toggle('hidden', queued.length > 0);
+    renderQueueList(document.getElementById('queue-list-admin'), queued, { clickable: true, deletable: false });
+    return;
+  }
+
+  noActiveBlock.classList.add('hidden');
+  activeBlock.classList.remove('hidden');
+
+  document.getElementById('round-number-admin').textContent = 'Round ' + active.roundNumber;
+
+  const phase = active.phase;
   document.getElementById('admin-ready-controls').classList.toggle('hidden', phase !== 'ready');
   document.getElementById('admin-running-controls').classList.toggle('hidden', phase !== 'running');
   document.getElementById('admin-winner-controls').classList.toggle('hidden', phase !== 'winner');
-  document.getElementById('participants-grid-admin').classList.toggle('hidden', phase === 'leaderboard');
 
-  if (phase === 'ready') {
-    document.getElementById('round-number-admin').textContent = 'Round ' + currentLive.roundNumber;
-    renderParticipantsGrid(document.getElementById('participants-grid-admin'), currentLive.participants, 'admin');
-  } else if (phase === 'running') {
-    document.getElementById('round-number-admin-running').textContent = 'Round ' + currentLive.roundNumber;
-    renderParticipantsGrid(document.getElementById('participants-grid-admin'), currentLive.participants, 'admin');
-  } else if (phase === 'winner') {
-    renderParticipantsGrid(document.getElementById('participants-grid-admin'), currentLive.participants, 'admin');
+  renderParticipantsGrid(
+    document.getElementById('participants-grid-admin'),
+    active.participants, 'admin', phase,
+    { tappable: phase === 'running', onTap: (idx) => handleStop(active.id, idx) }
+  );
+
+  document.getElementById('phase-winner-admin').classList.toggle('hidden', !(phase === 'winner' && adminWinnerOverlayVisible));
+  if (phase === 'winner' && active.winner) {
+    document.getElementById('winner-name-admin').textContent = active.winner.name;
+    document.getElementById('winner-class-admin').textContent = active.winner.class || '';
+    document.getElementById('winner-time-admin').textContent = formatTime(active.winner.timeMs);
+  }
+}
+
+/* ---------------- Rendering: register view ---------------- */
+function renderRegisterStats(completed) {
+  document.getElementById('stat-rounds').textContent = completed.length;
+  document.getElementById('stat-participants').textContent = currentPlayers.length;
+  const revenue = completed.reduce((sum, r) => sum + (r.cost || 0), 0);
+  document.getElementById('stat-revenue').textContent = 'Rs. ' + revenue.toLocaleString();
+}
+function renderRegisterQueue(queued) {
+  document.getElementById('register-empty-queue-msg').classList.toggle('hidden', queued.length > 0);
+  renderQueueList(document.getElementById('queue-list-register'), queued, { clickable: false, deletable: true });
+}
+
+/* ---------------- Shared queue list renderer ---------------- */
+function renderQueueList(container, rounds, opts = {}) {
+  if (!container) return;
+  const { clickable = false, deletable = false } = opts;
+  container.innerHTML = '';
+  rounds.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'queue-row' + (clickable ? ' clickable' : '');
+    const names = r.participants.map(p => p.name).join(', ');
+    row.innerHTML = `
+      ${i === 0 ? '<span class="queue-next-tag">NEXT</span>' : ''}
+      <div class="queue-round-badge">Round ${r.roundNumber}</div>
+      <div class="queue-participants">${escapeHtml(names)}</div>
+      <div class="queue-cost">Rs. ${r.cost || 0}</div>
+      ${deletable ? '<button class="queue-delete-btn" type="button" aria-label="Remove round">✕</button>' : ''}
+    `;
+    if (clickable) {
+      row.onclick = (e) => {
+        if (e.target.closest('.queue-delete-btn')) return;
+        activateRound(r.id);
+      };
+    }
+    if (deletable) {
+      const delBtn = row.querySelector('.queue-delete-btn');
+      delBtn.onclick = (e) => { e.stopPropagation(); deleteQueuedRound(r.id); };
+    }
+    container.appendChild(row);
+  });
+}
+
+/* ---------------- Central render pass ---------------- */
+function recomputeAndRenderAll() {
+  const active = computeActiveRound();
+  const queued = computeQueuedRounds();
+  const completed = computeCompletedRounds();
+
+  renderRegisterStats(completed);
+  renderRegisterQueue(queued);
+  renderDisplay(active);
+  renderAdmin(active, queued);
+}
+
+/* ---------------- Winner overlay timing + round finalization ---------------- */
+function handleWinnerTiming(active) {
+  if (active && active.phase === 'winner' && active.winnerAt) {
+    if (lastWinnerAtSeenAdmin !== active.winnerAt) {
+      lastWinnerAtSeenAdmin = active.winnerAt;
+      const remain = 3000 - (Date.now() - active.winnerAt);
+      if (remain <= 0) {
+        adminWinnerOverlayVisible = false;
+      } else {
+        adminWinnerOverlayVisible = true;
+        setTimeout(() => { adminWinnerOverlayVisible = false; recomputeAndRenderAll(); }, remain);
+      }
+    }
+    if (!finalizeScheduledForRound[active.id]) {
+      finalizeScheduledForRound[active.id] = true;
+      const remain2 = 5000 - (Date.now() - active.winnerAt);
+      setTimeout(() => { finalizeRoundIfNeeded(active.id); }, Math.max(remain2, 0));
+    }
+  }
+}
+
+async function updatePlayersLeaderboard(participants) {
+  for (const p of participants) {
+    const id = normalizeName(p.name);
+    if (!id) continue;
+    const ref = playersRef.doc(id);
+    const snap = await ref.get();
+    if (snap.exists) {
+      const data = snap.data();
+      const newBest = Math.min(data.bestTimeMs ?? Infinity, p.stopTimeMs);
+      await ref.set({
+        name: p.name,
+        class: p.class || data.class || '',
+        bestTimeMs: newBest,
+        roundsPlayed: firebase.firestore.FieldValue.increment(1)
+      }, { merge: true });
+    } else {
+      await ref.set({ name: p.name, class: p.class || '', bestTimeMs: p.stopTimeMs, roundsPlayed: 1 });
+    }
+  }
+}
+
+async function finalizeRoundIfNeeded(roundId) {
+  const ref = roundsRef.doc(roundId);
+  let participantsSnapshot = null;
+  let shouldFinalize = false;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    const data = snap.data();
+    if (data.status === 'active') {
+      tx.update(ref, { status: 'completed', phase: 'done', completedAt: Date.now() });
+      shouldFinalize = true;
+      participantsSnapshot = data.participants;
+    }
+  });
+  if (shouldFinalize && participantsSnapshot) {
+    await updatePlayersLeaderboard(participantsSnapshot);
   }
 }
 
 /* ---------------- Timer tick loop (client-side, no writes) ---------------- */
 function tick() {
-  if (currentLive && currentLive.phase === 'running' && currentLive.startTimestamp) {
-    const elapsed = Date.now() - currentLive.startTimestamp;
-    currentLive.participants.forEach((p, idx) => {
+  const active = computeActiveRound();
+  if (active && active.phase === 'running' && active.startTimestamp) {
+    const elapsed = Date.now() - active.startTimestamp;
+    active.participants.forEach((p, idx) => {
       if (p.status === 'running') {
         const txt = formatTime(elapsed);
         const dEl = document.getElementById('display-timer-' + idx);
@@ -592,7 +824,7 @@ function renderLeaderboardList() {
   });
 }
 
-/* ---------------- New Round modal ---------------- */
+/* ---------------- New Round modal (Register page) ---------------- */
 function openNewRoundModal() {
   modalRows = [{ name: '', class: '' }, { name: '', class: '' }];
   renderModalRows();
@@ -608,7 +840,7 @@ function renderModalRows() {
       <span class="modal-row-num">${i + 1}</span>
       <input type="text" placeholder="Participant name" value="${escapeHtml(row.name)}" data-idx="${i}" data-field="name" class="modal-input name-input">
       <input type="text" placeholder="Class" value="${escapeHtml(row.class)}" data-idx="${i}" data-field="class" class="modal-input class-input">
-      <button class="row-remove-btn" data-idx="${i}" ${modalRows.length <= 1 ? 'disabled' : ''}>✕</button>
+      <button class="row-remove-btn" type="button" data-idx="${i}" ${modalRows.length <= 1 ? 'disabled' : ''}>✕</button>
     `;
     wrap.appendChild(div);
   });
@@ -627,100 +859,102 @@ function renderModalRows() {
   });
   document.getElementById('add-row-btn').disabled = modalRows.length >= 9;
 }
-function confirmNewRound() {
+async function confirmNewRound() {
   const cleaned = modalRows
     .map(r => ({ name: r.name.trim(), class: r.class.trim() }))
     .filter(r => r.name.length > 0);
   if (cleaned.length === 0) { alert('Please enter at least one participant name.'); return; }
+
   const participants = cleaned.map(r => ({ name: r.name, class: r.class, status: 'pending', stopTimeMs: null, place: null }));
-  const nextRoundNumber = (currentLive && currentLive.roundNumber ? currentLive.roundNumber : 0) + 1;
-  liveRef.set({ phase: 'ready', roundNumber: nextRoundNumber, participants, startTimestamp: null, winner: null });
+  const nextRoundNumber = allRounds.reduce((max, r) => Math.max(max, r.roundNumber || 0), 0) + 1;
+
+  await roundsRef.add({
+    roundNumber: nextRoundNumber,
+    status: 'queued',
+    phase: 'ready',
+    participants,
+    cost: currentSettings.costPerRound || 0,
+    createdAt: Date.now(),
+    startTimestamp: null,
+    winner: null,
+    winnerAt: null,
+    activatedAt: null,
+    completedAt: null
+  });
+
   document.getElementById('new-round-modal').classList.add('hidden');
 }
-
-/* ---------------- Round control actions ---------------- */
-function startTimers() {
-  if (!currentLive || currentLive.phase !== 'ready') return;
-  const participants = currentLive.participants.map(p => ({ ...p, status: 'running' }));
-  liveRef.update({ phase: 'running', startTimestamp: Date.now(), participants });
+async function deleteQueuedRound(id) {
+  if (!confirm('Remove this round from the queue?')) return;
+  await roundsRef.doc(id).delete();
 }
-function cancelRound() {
-  if (!confirm('Cancel this round?')) return;
-  const revertRound = Math.max(0, (currentLive.roundNumber || 1) - 1);
-  liveRef.set({ phase: 'leaderboard', roundNumber: revertRound, participants: [], startTimestamp: null, winner: null });
+
+/* ---------------- Round control actions (Admin page) ---------------- */
+async function activateRound(roundId) {
+  const active = computeActiveRound();
+  if (active) { alert('A round is already active. Finish it before starting another.'); return; }
+  await roundsRef.doc(roundId).update({ status: 'active', activatedAt: Date.now() });
 }
-function handleStop(index) {
-  if (!currentLive || currentLive.phase !== 'running') return;
-  if (!currentLive.participants[index]) return;
-  if (currentLive.participants[index].status === 'stopped') return;
-
-  const elapsed = Date.now() - currentLive.startTimestamp;
-  const updated = currentLive.participants.map(p => ({ ...p }));
-  const stoppedCountBefore = updated.filter(p => p.status === 'stopped').length;
-  updated[index].status = 'stopped';
-  updated[index].stopTimeMs = elapsed;
-  updated[index].place = stoppedCountBefore + 1;
-
-  const allStopped = updated.every(p => p.status === 'stopped');
-
-  if (allStopped) {
-    const winner = updated.find(p => p.place === 1);
-    liveRef.update({
-      participants: updated,
-      phase: 'winner',
-      winner: { name: winner.name, class: winner.class, timeMs: winner.stopTimeMs }
-    }).then(() => {
-      finalizeRound(updated);
-      setTimeout(() => { liveRef.update({ phase: 'leaderboard' }); }, 4000);
-    });
-  } else {
-    liveRef.update({ participants: updated });
-  }
+async function startTimers() {
+  const active = computeActiveRound();
+  if (!active || active.phase !== 'ready') return;
+  const participants = active.participants.map(p => ({ ...p, status: 'running' }));
+  await roundsRef.doc(active.id).update({ phase: 'running', startTimestamp: Date.now(), participants });
 }
-async function finalizeRound(participants) {
-  const cost = currentSettings.costPerRound || 0;
-  await statsRef.set({
-    totalRounds: firebase.firestore.FieldValue.increment(1),
-    totalRevenue: firebase.firestore.FieldValue.increment(cost)
-  }, { merge: true });
+async function sendBackToQueue() {
+  const active = computeActiveRound();
+  if (!active || active.phase !== 'ready') return;
+  if (!confirm('Send this round back to the queue?')) return;
+  await roundsRef.doc(active.id).update({ status: 'queued', activatedAt: null });
+}
+async function handleStop(roundId, index) {
+  const ref = roundsRef.doc(roundId);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    const data = snap.data();
+    if (data.status !== 'active' || data.phase !== 'running') return;
+    if (!data.participants[index] || data.participants[index].status === 'stopped') return;
 
-  for (const p of participants) {
-    const id = normalizeName(p.name);
-    if (!id) continue;
-    const ref = playersRef.doc(id);
-    const snap = await ref.get();
-    if (snap.exists) {
-      const data = snap.data();
-      const newBest = Math.min(data.bestTimeMs ?? Infinity, p.stopTimeMs);
-      await ref.set({
-        name: p.name,
-        class: p.class || data.class || '',
-        bestTimeMs: newBest,
-        roundsPlayed: firebase.firestore.FieldValue.increment(1)
-      }, { merge: true });
+    const elapsed = Date.now() - data.startTimestamp;
+    const updated = data.participants.map(p => ({ ...p }));
+    const stoppedBefore = updated.filter(p => p.status === 'stopped').length;
+    updated[index] = { ...updated[index], status: 'stopped', stopTimeMs: elapsed, place: stoppedBefore + 1 };
+
+    const allStopped = updated.every(p => p.status === 'stopped');
+    if (allStopped) {
+      const winner = updated.find(p => p.place === 1);
+      tx.update(ref, {
+        participants: updated,
+        phase: 'winner',
+        winner: { name: winner.name, class: winner.class, timeMs: winner.stopTimeMs },
+        winnerAt: Date.now()
+      });
     } else {
-      await ref.set({ name: p.name, class: p.class || '', bestTimeMs: p.stopTimeMs, roundsPlayed: 1 });
+      tx.update(ref, { participants: updated });
     }
-  }
+  });
 }
 
 /* ---------------- Keyboard listener (admin only) ---------------- */
 document.addEventListener('keydown', (e) => {
   if (location.hash !== '#admin') return;
-  if (!currentLive || currentLive.phase !== 'running') return;
+  const active = computeActiveRound();
+  if (!active || active.phase !== 'running') return;
   if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
   const num = parseInt(e.key, 10);
   if (isNaN(num) || num < 1 || num > 9) return;
-  handleStop(num - 1);
+  handleStop(active.id, num - 1);
 });
 
 /* ---------------- Reset all data ---------------- */
 async function resetAllData() {
-  if (!confirm('This will erase all rounds, players, and stats. Continue?')) return;
-  const snap = await playersRef.get();
-  await Promise.all(snap.docs.map(d => d.ref.delete()));
-  await statsRef.set({ totalRounds: 0, totalRevenue: 0 });
-  await liveRef.set({ phase: 'leaderboard', roundNumber: 0, participants: [], startTimestamp: null, winner: null });
+  if (!confirm('This will erase all rounds (queued & completed) and the leaderboard. Continue?')) return;
+  const [roundsSnap, playersSnap] = await Promise.all([roundsRef.get(), playersRef.get()]);
+  await Promise.all([
+    ...roundsSnap.docs.map(d => d.ref.delete()),
+    ...playersSnap.docs.map(d => d.ref.delete())
+  ]);
 }
 
 /* ---------------- Wire up static buttons ---------------- */
@@ -731,8 +965,10 @@ function wireUpUI() {
   };
   document.getElementById('modal-cancel-btn').onclick = () => document.getElementById('new-round-modal').classList.add('hidden');
   document.getElementById('modal-ok-btn').onclick = confirmNewRound;
+
   document.getElementById('start-timers-btn').onclick = startTimers;
-  document.getElementById('cancel-round-btn').onclick = cancelRound;
+  document.getElementById('send-back-btn').onclick = sendBackToQueue;
+
   document.getElementById('save-cost-btn').onclick = () => {
     const val = parseFloat(document.getElementById('cost-input').value);
     settingsRef.set({ costPerRound: isNaN(val) ? 0 : val }, { merge: true });
@@ -749,41 +985,30 @@ async function initApp() {
   try {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    liveRef = db.collection('meta').doc('live');
+    roundsRef = db.collection('rounds');
     settingsRef = db.collection('meta').doc('settings');
-    statsRef = db.collection('meta').doc('stats');
     playersRef = db.collection('players');
 
-    const liveSnap = await liveRef.get();
-    if (!liveSnap.exists) {
-      await liveRef.set({ phase: 'leaderboard', roundNumber: 0, participants: [], startTimestamp: null, winner: null });
-    }
     const settingsSnap = await settingsRef.get();
     if (!settingsSnap.exists) { await settingsRef.set({ costPerRound: 0 }); }
-    const statsSnap = await statsRef.get();
-    if (!statsSnap.exists) { await statsRef.set({ totalRounds: 0, totalRevenue: 0 }); }
 
-    liveRef.onSnapshot(doc => {
-      currentLive = doc.data();
-      renderDisplay();
-      renderAdmin();
+    roundsRef.orderBy('createdAt', 'asc').onSnapshot(snap => {
+      allRounds = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const active = computeActiveRound();
+      handleWinnerTiming(active);
+      recomputeAndRenderAll();
     });
 
     settingsRef.onSnapshot(doc => {
       currentSettings = doc.data() || { costPerRound: 0 };
       const input = document.getElementById('cost-input');
       if (document.activeElement !== input) { input.value = currentSettings.costPerRound || ''; }
-    });
-
-    statsRef.onSnapshot(doc => {
-      currentStats = doc.data() || { totalRounds: 0, totalRevenue: 0 };
-      document.getElementById('stat-rounds').textContent = currentStats.totalRounds || 0;
-      document.getElementById('stat-revenue').textContent = 'Rs. ' + (currentStats.totalRevenue || 0).toLocaleString();
+      recomputeAndRenderAll();
     });
 
     playersRef.orderBy('bestTimeMs', 'asc').onSnapshot(snap => {
       currentPlayers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      document.getElementById('stat-participants').textContent = currentPlayers.length;
+      renderRegisterStats(computeCompletedRounds());
       renderLeaderboardList();
     });
 
